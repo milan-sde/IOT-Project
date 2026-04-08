@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: traffic-monitoring-dashboard
+    runtime: python
+    buildCommand: pip install -r requirements-deploy.txt
+    startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --workers 2 --threads 4
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: MAX_VIOLATIONS
+        value: 200
+      - key: FRAME_WIDTH
+        value: 640
+      - key: FRAME_HEIGHT
+        value: 480

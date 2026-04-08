@@ -512,23 +512,42 @@ behind. This prevents the "running average lag" problem common in OpenCV loops.
 
 ---
 
-## Connecting to Your Main Dashboard
+## Connecting to Render Dashboard
 
-Your main project has a Flask server (`server.py`) that receives violations.
-To send detections from the Pi to your main server:
+Deploy your dashboard server to Render for remote access from anywhere.
 
-1. Start your main server on a machine reachable from the Pi:
-   ```bash
-   python server.py
-   ```
+### Step 1: Deploy Dashboard to Render
 
-2. Update the Pi's `config.env`:
-   ```env
-   SERVER_URL=http://<your-server-ip>:5000/upload
-   ```
+1. Push your code to GitHub
+2. Go to [render.com](https://render.com) and sign in
+3. Click **New +** → **Web Service**
+4. Connect your GitHub repository
+5. Configure:
+   - **Name**: `traffic-monitoring-dashboard`
+   - **Region**: Choose closest to you
+   - **Branch**: `main`
+   - **Root Directory**: (leave empty)
+   - **Runtime**: `Python 3`
+   - **Build Command**: `pip install -r requirements-deploy.txt`
+   - **Start Command**: `gunicorn server:app --bind 0.0.0.0:$PORT --workers 2 --threads 4`
+6. Click **Create Web Service**
 
-3. In `main.py`, uncomment the HTTP upload section or add a
-   `send_to_dashboard()` call in the main loop when violations are detected.
+After deployment, you'll get a URL like: `https://traffic-monitoring-dashboard.onrender.com`
 
-The `cam-detection.py` in the main project folder already has this integration.
-The Pi version focuses on local display/streaming.
+### Step 2: Configure Pi to Send Data to Render
+
+Update the Pi's `config.env`:
+```env
+SERVER_URL=https://traffic-monitoring-dashboard.onrender.com/upload
+FRAME_URL=https://traffic-monitoring-dashboard.onrender.com/frame
+```
+
+### How It Works
+
+- The Pi automatically sends frames (~2 FPS) to the Render server for live streaming
+- When a helmet violation is detected, the Pi sends the violation image to the server
+- Access your dashboard from any browser at the Render URL
+
+### Offline Mode
+
+If the Render server is unreachable, the Pi continues running locally with streaming at `http://pi-ip:5000`.

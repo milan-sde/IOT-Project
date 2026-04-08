@@ -28,9 +28,11 @@ import threading
 import queue
 from dataclasses import dataclass, field
 from pathlib import Path
+from io import BytesIO
 
 import cv2
 import numpy as np
+import requests
 from ultralytics import YOLO
 
 # ============================================================
@@ -50,6 +52,7 @@ TARGET_FPS = int(os.getenv("TARGET_FPS", "10"))
 DEBUG = os.getenv("DEBUG", "1") == "1"
 USE_ONNX = os.getenv("USE_ONNX", "0") == "1"
 SERVER_URL = os.getenv("SERVER_URL", "http://127.0.0.1:5000/upload")
+FRAME_URL = os.getenv("FRAME_URL", "http://127.0.0.1:5000/frame")
 LOG_FILE = os.getenv("LOG_FILE", "detection.log")
 
 # ============================================================
@@ -207,6 +210,29 @@ def is_violation_label(class_name: str) -> bool:
         or "no_helmet" in label_lower
         or "no_helmet" in label_lower
     )
+
+
+def send_frame_to_server(frame):
+    """Send annotated frame to the dashboard server for live streaming."""
+    try:
+        is_success, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
+        if is_success:
+            files = {"frame": ("frame.jpg", BytesIO(buffer.tobytes()), "image/jpeg")}
+            requests.post(FRAME_URL, files=files, timeout=2)
+    except Exception as e:
+        log.debug(f"Frame upload failed: {e}")
+
+
+def send_violation_to_server(frame):
+    """Send violation image to the dashboard server."""
+    try:
+        is_success, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        if is_success:
+            files = {"image": ("violation.jpg", BytesIO(buffer.tobytes()), "image/jpeg")}
+            requests.post(SERVER_URL, files=files, timeout=5)
+            log.info("Violation sent to dashboard server")
+    except Exception as e:
+        log.warning(f"Violation upload failed: {e}")
 
 
 # ============================================================
@@ -373,6 +399,8 @@ def main():
     loop_count = 0
     consec_violations = 0
     last_alert_time = 0.0
+    last_frame_upload = 0.0
+    last_violation_sent = 0.0
 
     try:
         while state.running:
@@ -412,12 +440,20 @@ def main():
                         state.violation_count += 1
                         last_alert_time = now
                         consec_violations = 0
+                        if now - last_violation_sent >= 5.0:
+                            threading.Thread(target=send_violation_to_server, args=(stream_frame.copy(),), daemon=True).start()
+                            last_violation_sent = now
 
             if detections:
                 draw_detections(stream_frame, detections)
 
             draw_overlay(stream_frame, state, len([d for d in detections if d["is_violation"]]))
             streamer.update(stream_frame)
+
+            now = time.time()
+            if now - last_frame_upload >= 0.5:
+                threading.Thread(target=send_frame_to_server, args=(stream_frame.copy(),), daemon=True).start()
+                last_frame_upload = now
 
             frame_elapsed = time.time() - loop_start
             frame_time_avg = frame_time_avg * 0.8 + frame_elapsed * 0.2

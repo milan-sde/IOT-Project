@@ -1,3 +1,14 @@
 iotproject/
 # Ignore the virtual environment
 venv/
+
+# Environment files with potential secrets
+.env
+*.log
+
+# Received images (generated at runtime)
+received_images/
+
+# Model files (should be downloaded separately)
+*.pt
+*.onnx

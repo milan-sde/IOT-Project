@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
 # Raspberry Pi 4 - Helmet Detection System
-# Installation Script (from a fresh Raspberry Pi OS 64-bit)
+# Installation Script (for Raspberry Pi OS 64-bit)
 # ============================================================
 # Run this on your Pi 4 as:
 #   chmod +x install.sh && ./install.sh
@@ -34,17 +34,13 @@ sudo apt install -y \
     python3-pip \
     python3-venv \
     python3-dev \
-    libopencv-dev \
     libjpeg-dev \
     libpng-dev \
-    libatlas-base-dev \
-    libjasper-dev \
+    libopenblas-dev \
     libhdf5-dev \
-    libhdf5-serial-dev \
     pkg-config \
     cmake \
     libwebp-dev \
-    libopenexr-dev \
     libgstreamer1.0-dev \
     libgstreamer-plugins-base1.0-dev \
     gstreamer1.0-plugins-good \
