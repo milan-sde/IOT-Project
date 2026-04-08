@@ -15,6 +15,7 @@ HELMET_CONF_THRES = float(os.getenv("HELMET_CONF_THRES", "0.4"))
 VIOLATION_COOLDOWN_SEC = float(os.getenv("VIOLATION_COOLDOWN_SEC", "5"))
 VIOLATION_STREAK_FRAMES = int(os.getenv("VIOLATION_STREAK_FRAMES", "3"))
 PROCESS_EVERY_N_FRAMES = max(1, int(os.getenv("PROCESS_EVERY_N_FRAMES", "2")))
+STREAM_EVERY_N_FRAMES = max(1, int(os.getenv("STREAM_EVERY_N_FRAMES", "2")))
 FRAME_WIDTH = int(os.getenv("FRAME_WIDTH", "640"))
 FRAME_HEIGHT = int(os.getenv("FRAME_HEIGHT", "480"))
 MODEL_IMGSZ = int(os.getenv("MODEL_IMGSZ", "640"))
@@ -23,6 +24,7 @@ DEBUG = os.getenv("DEBUG", "1") == "1"
 NOTIFY_TELEGRAM = os.getenv("NOTIFY_TELEGRAM", "0") == "1"
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+PREVIEW_FRAME_URL = os.getenv("PREVIEW_FRAME_URL", "http://127.0.0.1:5000/frame")
 
 
 DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -186,6 +188,24 @@ def send_image(image_bytes):
     return False
 
 
+def send_preview_frame(frame):
+    image_bytes = encode_frame(frame)
+    if image_bytes is None:
+        return False
+
+    try:
+        response = requests.post(
+            PREVIEW_FRAME_URL,
+            files={"frame": ("frame.jpg", image_bytes, "image/jpeg")},
+            timeout=2,
+        )
+        return response.ok
+    except requests.RequestException as exc:
+        if DEBUG:
+            print(f"[DEBUG] Preview frame upload failed: {exc}")
+        return False
+
+
 def update_fps(state):
     now = time.time()
     delta = now - state.last_fps_at
@@ -298,6 +318,8 @@ def main():
             cv2.putText(frame, "Monitoring...", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
             cv2.putText(frame, f"FPS: {state.fps:.1f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
             resized = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT))
+            if state.frame_index % STREAM_EVERY_N_FRAMES == 0:
+                send_preview_frame(resized)
             cv2.imshow("Helmet Detection - IoT System", resized)
             if cv2.waitKey(1) == 27:
                 print("[INFO] Exiting...")
@@ -310,6 +332,9 @@ def main():
 
         if should_alert:
             handle_violation(processed_frame, violations, state)
+
+        if state.frame_index % STREAM_EVERY_N_FRAMES == 0:
+            send_preview_frame(processed_frame)
 
         cv2.imshow("Helmet Detection - IoT System", processed_frame)
 
