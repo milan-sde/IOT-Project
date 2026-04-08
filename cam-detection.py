@@ -10,7 +10,8 @@ from pathlib import Path
 
 
 HELMET_MODEL_PATH = os.getenv("HELMET_MODEL_PATH", "models/milan_model.pt")
-SERVER_URL = os.getenv("SERVER_URL", "http://127.0.0.1:5000/upload")
+SERVER_URL = os.getenv("SERVER_URL", "https://helmet-dashboard-zwli.onrender.com//upload")
+
 HELMET_CONF_THRES = float(os.getenv("HELMET_CONF_THRES", "0.4"))
 VIOLATION_COOLDOWN_SEC = float(os.getenv("VIOLATION_COOLDOWN_SEC", "5"))
 VIOLATION_STREAK_FRAMES = int(os.getenv("VIOLATION_STREAK_FRAMES", "3"))
@@ -24,7 +25,7 @@ DEBUG = os.getenv("DEBUG", "1") == "1"
 NOTIFY_TELEGRAM = os.getenv("NOTIFY_TELEGRAM", "0") == "1"
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
-PREVIEW_FRAME_URL = os.getenv("PREVIEW_FRAME_URL", "http://127.0.0.1:5000/frame")
+PREVIEW_FRAME_URL = os.getenv("PREVIEW_FRAME_URL", "https://helmet-dashboard-zwli.onrender.com//frame")
 
 
 DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"

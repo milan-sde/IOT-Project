@@ -13,12 +13,9 @@ venv/
 # Logs
 *.log
 
-# Model files (download separately)
-models/*.pt
-models/*.onnx
-
 # Dashboard uploads (generated at runtime)
 dashboard/received_images/
+received_images/
 
 # IDE
 .vscode/
