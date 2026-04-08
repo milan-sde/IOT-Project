@@ -1,14 +1,25 @@
-iotproject/
-# Ignore the virtual environment
-venv/
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
 
-# Environment files with potential secrets
+# Virtual environments
+iotproject/
+venv/
 .env
+
+# Logs
 *.log
 
-# Received images (generated at runtime)
-received_images/
+# Model files (download separately)
+models/*.pt
+models/*.onnx
 
-# Model files (should be downloaded separately)
-*.pt
-*.onnx
+# Dashboard uploads (generated at runtime)
+dashboard/received_images/
+
+# IDE
+.vscode/
+.idea/

@@ -2,6 +2,7 @@ services:
   - type: web
     name: traffic-monitoring-dashboard
     runtime: python
+    rootDirectory: dashboard
     buildCommand: pip install -r requirements-deploy.txt
     startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --workers 2 --threads 4
     envVars:
