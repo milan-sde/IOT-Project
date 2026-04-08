@@ -1,0 +1,19 @@
+# Raspberry Pi 4 - Helmet Detection System
+# Dependencies
+
+# Core
+opencv-python==4.9.0.80
+ultralytics==8.1.0
+numpy==1.26.4
+
+# Web server
+flask==3.0.0
+werkzeug==3.0.1
+
+# HTTP client (for sending violations to your dashboard)
+requests==2.31.0
+
+# --- Optional: ONNX Runtime (30-50% faster CPU inference) ---
+# Install only if you convert your .pt model to .onnx format
+# See README section: "Upgrading to ONNX for extra FPS"
+# onnxruntime==1.17.0
