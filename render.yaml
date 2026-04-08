@@ -10,7 +10,3 @@ services:
         value: 10000
       - key: MAX_VIOLATIONS
         value: 200
-      - key: FRAME_WIDTH
-        value: 640
-      - key: FRAME_HEIGHT
-        value: 480

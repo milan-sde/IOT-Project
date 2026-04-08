@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-HELMET_MODEL_PATH = os.getenv("HELMET_MODEL_PATH", "milan_model.pt")
+HELMET_MODEL_PATH = os.getenv("HELMET_MODEL_PATH", "models/milan_model.pt")
 SERVER_URL = os.getenv("SERVER_URL", "http://127.0.0.1:5000/upload")
 HELMET_CONF_THRES = float(os.getenv("HELMET_CONF_THRES", "0.4"))
 VIOLATION_COOLDOWN_SEC = float(os.getenv("VIOLATION_COOLDOWN_SEC", "5"))
